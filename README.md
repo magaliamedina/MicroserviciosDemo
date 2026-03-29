@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # MicroserviciosDemo
 Proyecto .NET 8 con microservicios y Docker
 =======
@@ -77,4 +76,3 @@ Acceder a los endpoints:
 Catálogo: http://localhost:5001/api/products
 
 Órdenes: http://localhost:5002/api/orders
->>>>>>> 4744f9f (Proyecto inicial con microservicios en .NET 8 y Docker)
