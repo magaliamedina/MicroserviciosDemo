@@ -6,4 +6,5 @@
   </Folder>
   <Project Path="CatalogService/CatalogService.csproj" />
   <Project Path="OrderService/OrderService.csproj" />
+  <Project Path="PaymentService/PaymentService.csproj" Id="28cb6c04-575f-45a8-8367-2b3b4b661c84" />
 </Solution>
