@@ -5,16 +5,31 @@ services:
     build: ./CatalogService
     ports:
       - "5001:8080"
+    healthcheck:
+        test: ["CMD", "wget", "--spider", "http://localhost:8080/health"]
+        interval: 10s
+        timeout: 5s
+        retries: 3
 
   orderservice:
     build: ./OrderService
     ports:
       - "5002:8080"
+    healthcheck:
+        test: ["CMD", "wget", "--spider", "http://localhost:8080/health"]
+        interval: 10s
+        timeout: 5s
+        retries: 3
 
   paymentservice:
     build: ./PaymentService
     ports:
       - "5003:8080"
+    healthcheck:
+        test: ["CMD", "wget", "--spider", "http://localhost:8080/health"]
+        interval: 10s
+        timeout: 5s
+        retries: 3
 
   apigateway:
     build: ./ApiGateway
@@ -24,3 +39,8 @@ services:
       - catalogservice
       - orderservice
       - paymentservice
+    healthcheck:
+        test: ["CMD", "wget", "--spider", "http://localhost:8080/health"]
+        interval: 10s
+        timeout: 5s
+        retries: 3

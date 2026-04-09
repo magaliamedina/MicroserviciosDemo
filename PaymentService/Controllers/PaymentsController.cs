@@ -6,6 +6,12 @@ namespace PaymentService.Controllers
     [Route("api/[controller]")]
     public class PaymentsController : ControllerBase
     {
+        private readonly ILogger<PaymentsController> _logger;
+
+        public PaymentsController(ILogger<PaymentsController> logger)
+        {
+            _logger = logger;
+        }
         [HttpGet]
         public IActionResult Ping()
         {
@@ -17,7 +23,10 @@ namespace PaymentService.Controllers
         public IActionResult ProcessPayment([FromBody] PaymentRequest request)
         {
             // Simular lentitud
-            Thread.Sleep(10000); // 10 segundos
+            //Thread.Sleep(10000); // 10 segundos con esto arroja error de timeout
+            //throw new Exception("Simulación fallo Payment"); //para probar fallback policy
+
+            _logger.LogInformation("Procesando pago");
 
             var paymentResult = new PaymentResult
             {
@@ -30,6 +39,7 @@ namespace PaymentService.Controllers
 
             return Ok(paymentResult);
         }
+    }
 
         // Modelo de request
         public class PaymentRequest

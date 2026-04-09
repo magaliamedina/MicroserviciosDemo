@@ -10,15 +10,20 @@ namespace OrderService.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly PaymentServiceClient _paymentClient;
+        private readonly ILogger<OrdersController> _logger;
 
-        public OrdersController(PaymentServiceClient paymentClient)
+        public OrdersController(PaymentServiceClient paymentClient,
+            ILogger<OrdersController> logger)
         {
             _paymentClient = paymentClient;
+            _logger = logger;
         }
 
         [HttpGet]
         public IActionResult GetOrders()
         {
+            _logger.LogInformation("Obteniendo lista de órdenes");
+
             var orders = new[]
             {
                 new { Id = 1, Product = "Laptop", Quantity = 1, Total = 1200 },
@@ -31,6 +36,7 @@ namespace OrderService.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] OrderRequest order)
         {
+            _logger.LogInformation("Creando nueva orden");
             int orderId = 3;
 
             var paymentRequest = new
