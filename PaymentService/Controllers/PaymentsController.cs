@@ -16,7 +16,9 @@ namespace PaymentService.Controllers
         [HttpPost]
         public IActionResult ProcessPayment([FromBody] PaymentRequest request)
         {
-            // Simulación de procesamiento de pago
+            // Simular lentitud
+            Thread.Sleep(10000); // 10 segundos
+
             var paymentResult = new PaymentResult
             {
                 PaymentId = Guid.NewGuid(),
@@ -28,10 +30,9 @@ namespace PaymentService.Controllers
 
             return Ok(paymentResult);
         }
-    }
 
-    // Modelo de request
-    public class PaymentRequest
+        // Modelo de request
+        public class PaymentRequest
     {
         public int OrderId { get; set; }
         public decimal Amount { get; set; }
