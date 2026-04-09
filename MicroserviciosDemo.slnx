@@ -4,6 +4,7 @@
     <File Path="docker-compose.yml" />
     <File Path="README.md" />
   </Folder>
+  <Project Path="ApiGateway/ApiGateway.csproj" Id="f6523769-9713-473f-a8f2-c04d6af67af8" />
   <Project Path="CatalogService/CatalogService.csproj" />
   <Project Path="OrderService/OrderService.csproj" />
   <Project Path="PaymentService/PaymentService.csproj" Id="28cb6c04-575f-45a8-8367-2b3b4b661c84" />
