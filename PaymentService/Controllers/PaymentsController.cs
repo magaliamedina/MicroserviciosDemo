@@ -26,7 +26,10 @@ namespace PaymentService.Controllers
             //Thread.Sleep(10000); // 10 segundos con esto arroja error de timeout
             //throw new Exception("Simulación fallo Payment"); //para probar fallback policy
 
-            _logger.LogInformation("Procesando pago");
+            _logger.LogInformation(
+                "💳 Procesando pago para OrderId {OrderId}",
+                request.OrderId
+            );
 
             var paymentResult = new PaymentResult
             {

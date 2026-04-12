@@ -14,5 +14,6 @@ RUN dotnet publish CatalogService.csproj -c Release -o /app/publish
 # Final
 FROM base AS final
 WORKDIR /app
+RUN mkdir -p /app/logs
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "CatalogService.dll"]

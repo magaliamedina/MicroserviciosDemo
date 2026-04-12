@@ -5,16 +5,20 @@ services:
     build: ./CatalogService
     ports:
       - "5001:8080"
+    volumes:
+      - ./CatalogService/logs:/app/logs
     healthcheck:
-        test: ["CMD", "wget", "--spider", "http://localhost:8080/health"]
-        interval: 10s
-        timeout: 5s
-        retries: 3
+      test: ["CMD", "wget", "--spider", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   orderservice:
     build: ./OrderService
     ports:
       - "5002:8080"
+    volumes:
+      - ./OrderService/logs:/app/logs
     healthcheck:
         test: ["CMD", "wget", "--spider", "http://localhost:8080/health"]
         interval: 10s
@@ -25,6 +29,8 @@ services:
     build: ./PaymentService
     ports:
       - "5003:8080"
+    volumes:
+      - ./PaymentService/logs:/app/logs
     healthcheck:
         test: ["CMD", "wget", "--spider", "http://localhost:8080/health"]
         interval: 10s
@@ -35,6 +41,8 @@ services:
     build: ./ApiGateway
     ports:
       - "5000:8080"
+    volumes:
+      - ./ApiGateway/logs:/app/logs
     depends_on:
       - catalogservice
       - orderservice

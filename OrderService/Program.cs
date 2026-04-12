@@ -6,9 +6,15 @@ using OrderService.Data;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
+    .WriteTo.File(
+        "logs/orderservice-.log",
+        rollingInterval: RollingInterval.Day
+    )
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog();
 
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseNpgsql(

@@ -52,29 +52,48 @@ namespace OrderService.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] Order order)
         {
-            _logger.LogInformation("Creando nueva orden");
-
-            order.CreatedAt = DateTime.UtcNow;
-            _context.Orders.Add(order);
-
-            await _context.SaveChangesAsync();
-
-            Console.WriteLine($"Orden guardada en DB: {order.Id}");
-
-            // Crear request de pago
-            var paymentRequest = new
+            try
             {
-                OrderId = order.Id,
-                Amount = order.Total
-            };
+                _logger.LogInformation(
+                    "Creando nueva orden para producto {Product}",
+                    order.Product
+                );
 
-            var paymentResult = await _paymentClient.ProcessPaymentAsync(paymentRequest);
+                order.CreatedAt = DateTime.UtcNow;
+                _context.Orders.Add(order);
 
-            return Ok(new
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine($"Orden guardada en DB: {order.Id}");
+
+                _logger.LogInformation(
+                    "✅ Orden guardada con ID {OrderId}",
+                    order.Id
+                );
+
+                // Crear request de pago
+                var paymentRequest = new
+                {
+                    OrderId = order.Id,
+                    Amount = order.Total
+                };
+
+                var paymentResult = await _paymentClient.ProcessPaymentAsync(paymentRequest);
+
+                return Ok(new
+                {
+                    order,
+                    Payment = paymentResult
+                });
+            }
+            catch (Exception ex)
             {
-                order,
-                Payment = paymentResult
-            });
+                _logger.LogError(
+                        ex,
+                        "❌ Error procesando orden"
+                    );
+                throw;
+            }            
         }
 
         [HttpPut("{id}")]
