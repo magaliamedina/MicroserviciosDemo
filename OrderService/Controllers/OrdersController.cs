@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OrderService.Data;
+using OrderService.Messaging;
 using OrderService.Models;
 using OrderService.Services;
 using System.Text;
@@ -15,14 +16,18 @@ namespace OrderService.Controllers
         private readonly PaymentServiceClient _paymentClient;
         private readonly ILogger<OrdersController> _logger;
         private readonly OrderDbContext _context;
+        private readonly RabbitMQPublisher _publisher;
 
-        public OrdersController(PaymentServiceClient paymentClient,
-            ILogger<OrdersController> logger, 
-            OrderDbContext context)
+        public OrdersController(
+                OrderDbContext context,
+                PaymentServiceClient paymentClient,
+                RabbitMQPublisher publisher,
+                ILogger<OrdersController> logger)
         {
-            _paymentClient = paymentClient;
-            _logger = logger;
             _context = context;
+            _paymentClient = paymentClient;
+            _publisher = publisher;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -63,6 +68,20 @@ namespace OrderService.Controllers
                 _context.Orders.Add(order);
 
                 await _context.SaveChangesAsync();
+
+                var orderEvent = new OrderCreatedEvent
+                {
+                    OrderId = order.Id,
+                    Product = order.Product,
+                    Total = order.Total
+                };
+
+                await _publisher.PublishOrderCreatedAsync(orderEvent);
+
+                _logger.LogInformation(
+                    "📡 Evento OrderCreated publicado para OrderId {OrderId}",
+                    order.Id
+                );
 
                 Console.WriteLine($"Orden guardada en DB: {order.Id}");
 

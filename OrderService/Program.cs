@@ -1,8 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+using OrderService.Data;
+using OrderService.Messaging;
 using Polly;
 using Polly.Extensions.Http;
 using Serilog;
-using Microsoft.EntityFrameworkCore;
-using OrderService.Data;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -15,6 +16,8 @@ Log.Logger = new LoggerConfiguration()
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog();
+
+builder.Services.AddSingleton<RabbitMQPublisher>();
 
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseNpgsql(

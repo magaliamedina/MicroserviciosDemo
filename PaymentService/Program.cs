@@ -1,3 +1,4 @@
+using PaymentService.Messaging;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -15,6 +16,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHostedService<RabbitMQConsumer>();
 
 builder.Services.AddHealthChecks();
 
