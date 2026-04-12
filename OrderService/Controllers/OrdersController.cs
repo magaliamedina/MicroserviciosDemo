@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using OrderService.Data;
+using OrderService.Models;
 using OrderService.Services;
 using System.Text;
 using System.Text.Json;
@@ -11,37 +14,57 @@ namespace OrderService.Controllers
     {
         private readonly PaymentServiceClient _paymentClient;
         private readonly ILogger<OrdersController> _logger;
+        private readonly OrderDbContext _context;
 
         public OrdersController(PaymentServiceClient paymentClient,
-            ILogger<OrdersController> logger)
+            ILogger<OrdersController> logger, 
+            OrderDbContext context)
         {
             _paymentClient = paymentClient;
             _logger = logger;
+            _context = context;
         }
 
         [HttpGet]
-        public IActionResult GetOrders()
+        public async Task<IActionResult> GetOrders()
         {
             _logger.LogInformation("Obteniendo lista de órdenes");
 
-            var orders = new[]
-            {
-                new { Id = 1, Product = "Laptop", Quantity = 1, Total = 1200 },
-                new { Id = 2, Product = "Mouse", Quantity = 2, Total = 50 }
-            };
+            var orders = await _context.Orders.ToListAsync();
 
             return Ok(orders);
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetOrder(int id)
+        {
+            var order = await _context.Orders.FindAsync(id);
+
+            if (order == null)
+                return NotFound(new
+                {
+                    message = $"Order con id {id} no encontrada"
+                });
+
+            return Ok(order);
+        }
+
         [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] OrderRequest order)
+        public async Task<IActionResult> CreateOrder([FromBody] Order order)
         {
             _logger.LogInformation("Creando nueva orden");
-            int orderId = 3;
 
+            order.CreatedAt = DateTime.UtcNow;
+            _context.Orders.Add(order);
+
+            await _context.SaveChangesAsync();
+
+            Console.WriteLine($"Orden guardada en DB: {order.Id}");
+
+            // Crear request de pago
             var paymentRequest = new
             {
-                OrderId = orderId,
+                OrderId = order.Id,
                 Amount = order.Total
             };
 
@@ -49,22 +72,59 @@ namespace OrderService.Controllers
 
             return Ok(new
             {
-                Order = order,
+                order,
                 Payment = paymentResult
             });
         }
-    }
 
-    public class OrderRequest
-    {
-        public string Product { get; set; } = "";
-        public int Quantity { get; set; }
-        public decimal Total { get; set; }
-    }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateOrder(int id, [FromBody] Order updatedOrder)
+        {
+            var order = await _context.Orders.FindAsync(id);
 
-    public class PaymentRequest
-    {
-        public int OrderId { get; set; }
-        public decimal Amount { get; set; }
+            if (order == null)
+            {
+                return NotFound(new
+                {
+                    message = $"Order con id {id} no encontrada"
+                });
+            }
+
+            // Actualizar campos
+            order.Product = updatedOrder.Product;
+            order.Quantity = updatedOrder.Quantity;
+            order.Total = updatedOrder.Total;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = $"Order con id {id} actualizada correctamente",
+                order
+            });
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteOrder(int id)
+        {
+            var order = await _context.Orders.FindAsync(id);
+
+            if (order == null)
+            {
+                return NotFound(new
+                {
+                    message = $"Order con id {id} no encontrada"
+                });
+            }
+
+            _context.Orders.Remove(order);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = $"Order con id {id} eliminada correctamente"
+            });
+        }
     }
 }

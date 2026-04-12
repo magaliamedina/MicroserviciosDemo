@@ -1,6 +1,8 @@
 using Polly;
 using Polly.Extensions.Http;
 using Serilog;
+using Microsoft.EntityFrameworkCore;
+using OrderService.Data;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -8,6 +10,10 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddDbContext<OrderDbContext>(options =>
+    options.UseNpgsql(
+        "Host=postgres;Port=5432;Database=ordersdb;Username=postgres;Password=postgres"
+    ));
 builder.Host.UseSerilog();
 
 // Registrar controladores
@@ -43,6 +49,37 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 
 app.MapHealthChecks("/health");
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
+
+    var retries = 10;
+
+    while (retries > 0)
+    {
+        try
+        {
+            Console.WriteLine("📦 Intentando aplicar migraciones...");
+
+            db.Database.Migrate();
+
+            Console.WriteLine("✅ Migraciones aplicadas");
+
+            break;
+        }
+        catch (Exception ex)
+        {
+            retries--;
+
+            Console.WriteLine(
+                $"⚠️ Error conectando a DB. Reintentos restantes: {retries}"
+            );
+
+            Thread.Sleep(5000);
+        }
+    }
+}
 
 app.Run();
 
