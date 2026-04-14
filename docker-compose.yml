@@ -12,6 +12,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    depends_on:
+      - postgres
 
   orderservice:
     build: ./OrderService
@@ -38,6 +40,7 @@ services:
         retries: 3
     depends_on:
       - rabbitmq
+      - postgres
 
   apigateway:
     build: ./ApiGateway

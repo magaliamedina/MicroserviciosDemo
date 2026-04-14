@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PaymentService.Models;
 
 namespace PaymentService.Controllers
 {
@@ -12,6 +13,7 @@ namespace PaymentService.Controllers
         {
             _logger = logger;
         }
+
         [HttpGet]
         public IActionResult Ping()
         {
@@ -43,21 +45,5 @@ namespace PaymentService.Controllers
             return Ok(paymentResult);
         }
     }
-
-        // Modelo de request
-        public class PaymentRequest
-    {
-        public int OrderId { get; set; }
-        public decimal Amount { get; set; }
-    }
-
-    // Modelo de respuesta
-    public class PaymentResult
-    {
-        public Guid PaymentId { get; set; }
-        public int OrderId { get; set; }
-        public decimal Amount { get; set; }
-        public string Status { get; set; } = string.Empty;
-        public string Message { get; set; } = string.Empty;
-    }
+    
 }
